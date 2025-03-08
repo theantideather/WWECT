@@ -38,8 +38,10 @@ function patchViteConfig() {
   if (fs.existsSync(viteConfigPath)) {
     let viteConfig = fs.readFileSync(viteConfigPath, 'utf8');
     
-    // Ensure dotenv is correctly loaded early in the file
-    if (!viteConfig.includes('const dotenv = require(\'dotenv\')')) {
+    // Only modify if it doesn't already have the necessary imports
+    // We'll check for both imports to avoid duplicate declarations
+    if (!viteConfig.includes('dotenv.config()') && !viteConfig.includes('const dotenv = require(\'dotenv\')')) {
+      console.log('Patching vite.config.js with dotenv config...');
       viteConfig = `const dotenv = require('dotenv');
 const dotenvExpand = require('dotenv-expand');
 dotenvExpand.expand(dotenv.config());
@@ -48,6 +50,8 @@ ${viteConfig}`;
       
       fs.writeFileSync(viteConfigPath, viteConfig);
       console.log('vite.config.js patched successfully');
+    } else {
+      console.log('vite.config.js already has dotenv configuration, skipping patch');
     }
   }
 }

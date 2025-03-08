@@ -1,9 +1,11 @@
 import { defineConfig, loadEnv } from 'vite';
 import { resolve } from 'path';
 import dotenv from 'dotenv';
+import dotenvExpand from 'dotenv-expand';
+import etherResolver from './vite-import-resolver';
 
 // Load environment variables
-dotenv.config();
+dotenvExpand.expand(dotenv.config());
 
 export default defineConfig(({ mode }) => {
   // Load env file based on `mode` in the current working directory.
@@ -34,6 +36,9 @@ export default defineConfig(({ mode }) => {
   });
   
   return {
+    // Custom plugins
+    plugins: [etherResolver()],
+    
     // Expose .env variables to your Vite app
     define: {
       'process.env': {
@@ -77,25 +82,28 @@ export default defineConfig(({ mode }) => {
     build: {
       sourcemap: true,
       outDir: 'dist',
+      emptyOutDir: true,
       commonjsOptions: {
         transformMixedEsModules: true,
       },
       rollupOptions: {
         output: {
           manualChunks: {
-            'vendor': ['ethers', 'three'],
+            'vendor': ['three'],
           }
-        }
+        },
+        external: ['ethers']
       }
     },
     resolve: {
       alias: {
-        '@': resolve(__dirname, 'src')
+        '@': resolve(__dirname, 'src'),
+        'ethers': resolve(__dirname, 'node_modules/ethers')
       }
     },
     optimizeDeps: {
-      include: ['three', 'ethers'],
-      exclude: [],
+      include: ['three'],
+      exclude: ['ethers'],
       esbuildOptions: {
         target: 'es2020'
       }

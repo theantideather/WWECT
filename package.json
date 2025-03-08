@@ -10,7 +10,8 @@
     "deploy:contract": "npx hardhat run scripts/deploy.js --network monadTestnet",
     "test:contract": "npx hardhat run scripts/test-contract.js --network monadTestnet",
     "test:mock": "node scripts/test-mock-mode.js",
-    "test:connection": "npx hardhat run scripts/test-monad-connection.js --network monadTestnet"
+    "test:connection": "npx hardhat run scripts/test-monad-connection.js --network monadTestnet",
+    "postinstall": "node postinstall.js"
   },
   "keywords": [
     "game",
@@ -43,5 +44,8 @@
   },
   "overrides": {
     "ethers": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=16.0.0"
   }
 }

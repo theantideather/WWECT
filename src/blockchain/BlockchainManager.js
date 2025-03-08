@@ -1,19 +1,23 @@
-import { ethers } from 'ethers';
-import { 
-    CONTRACT_ADDRESS, 
-    MONAD_TESTNET_RPC, 
-    WALLET_ADDRESS,
-    GAS_LIMIT,
-    MAX_PRIORITY_FEE_PER_GAS,
-    ENABLE_MOCK_MODE,
-    THROTTLE_INTERVAL,
-    MAX_TX_PER_MINUTE,
-    WWEMONAD_ABI,
-    ACTION_COSTS,
-    PRIVATE_KEY,
-    MAX_FEE_PER_GAS
-} from './config.js';
+// Use a more compatible way to import ethers
+// This avoids ESM/CJS compatibility issues during the build process
+let ethers;
+try {
+  // Try different import approaches to handle build environments
+  if (typeof require !== 'undefined') {
+    ethers = require('ethers');
+  } else {
+    import('ethers').then(module => {
+      ethers = module;
+    });
+  }
+} catch (error) {
+  console.error('Error importing ethers:', error);
+}
 
+// Import configuration
+import * as config from './config.js';
+
+// BlockchainManager handles all blockchain interactions
 class BlockchainManager {
     constructor() {
         console.log('🚀 Initializing BlockchainManager');
@@ -31,7 +35,7 @@ class BlockchainManager {
         
         // Use the environment variable for mock mode
         console.log('Raw ENABLE_MOCK_MODE value:', process.env.ENABLE_MOCK_MODE);
-        this.mockMode = process.env.ENABLE_MOCK_MODE === "true";
+        this.mockMode = process.env.ENABLE_MOCK_MODE === true;
         console.log('Parsed mock mode:', this.mockMode);
         
         // Keep track of all transactions for UI display
@@ -72,22 +76,26 @@ class BlockchainManager {
         if (this.mockMode) {
             console.log('Running in mock mode - blockchain transactions will be simulated');
             this.connected = true;
-            this.wallet = { address: WALLET_ADDRESS || process.env.WALLET_ADDRESS };
+            this.wallet = { address: config.WALLET_ADDRESS || process.env.WALLET_ADDRESS };
             return;
         }
         
         try {
             // Connect to Monad testnet
-            const rpcUrl = MONAD_TESTNET_RPC || process.env.MONAD_TESTNET_RPC;
+            const rpcUrl = config.MONAD_TESTNET_RPC || process.env.MONAD_TESTNET_RPC;
             if (!rpcUrl) {
                 throw new Error("No RPC URL provided");
             }
             
             console.log('Connecting to RPC URL:', rpcUrl);
+            // Use the ethers library after we've ensured it's loaded
+            if (!ethers) {
+                throw new Error("Ethers library not loaded yet");
+            }
             this.provider = new ethers.providers.JsonRpcProvider(rpcUrl);
             
             // Use environment private key
-            const privateKey = PRIVATE_KEY || process.env.PRIVATE_KEY;
+            const privateKey = config.PRIVATE_KEY || process.env.PRIVATE_KEY;
             if (privateKey) {
                 console.log('Using private key from environment');
                 this.signer = new ethers.Wallet(privateKey, this.provider);
@@ -97,17 +105,17 @@ class BlockchainManager {
                 console.log('Wallet address:', this.wallet.address);
             } else {
                 console.warn('No private key found in environment variables');
-                this.wallet = { address: WALLET_ADDRESS || process.env.WALLET_ADDRESS || "0x0000000000000000000000000000000000000000" };
+                this.wallet = { address: config.WALLET_ADDRESS || process.env.WALLET_ADDRESS || "0x0000000000000000000000000000000000000000" };
                 console.log('Using fallback wallet address:', this.wallet.address);
             }
             
             // Initialize contract
-            const contractAddress = CONTRACT_ADDRESS || process.env.CONTRACT_ADDRESS;
+            const contractAddress = config.CONTRACT_ADDRESS || process.env.CONTRACT_ADDRESS;
             if (contractAddress) {
                 console.log('Initializing contract at:', contractAddress);
                 this.contract = new ethers.Contract(
                     contractAddress,
-                    WWEMONAD_ABI,
+                    config.WWEMONAD_ABI,
                     this.signer
                 );
                 console.log('Contract initialized');
@@ -211,7 +219,7 @@ class BlockchainManager {
     startTransactionProcessor() {
         setInterval(() => {
             this.processNextTransaction();
-        }, parseInt(THROTTLE_INTERVAL || process.env.THROTTLE_INTERVAL || 5000));
+        }, parseInt(config.THROTTLE_INTERVAL || process.env.THROTTLE_INTERVAL || 5000));
         
         // Clean up old transactions from the recent list every minute
         setInterval(() => {
@@ -243,10 +251,10 @@ class BlockchainManager {
         const oneMinuteAgo = now - 60000;
         const recentTxCount = this.recentTransactions.filter(tx => tx.timestamp > oneMinuteAgo).length;
         
-        if (recentTxCount >= MAX_TX_PER_MINUTE) {
-            console.warn(`Transaction rate limit reached: ${recentTxCount}/${MAX_TX_PER_MINUTE} per minute`);
+        if (recentTxCount >= config.MAX_TX_PER_MINUTE) {
+            console.warn(`Transaction rate limit reached: ${recentTxCount}/${config.MAX_TX_PER_MINUTE} per minute`);
             // Try again in a bit
-            setTimeout(() => this.processNextTransaction(), THROTTLE_INTERVAL);
+            setTimeout(() => this.processNextTransaction(), config.THROTTLE_INTERVAL);
             return;
         }
         
@@ -258,15 +266,18 @@ class BlockchainManager {
         console.log('Processing transaction:', tx.actionType);
         
         try {
+            if (!ethers) {
+                throw new Error("Ethers library not available");
+            }
             // Prepare transaction parameters with appropriate gas settings
             const overrides = {
-                gasLimit: ethers.utils.hexlify(parseInt(GAS_LIMIT)),
+                gasLimit: ethers.utils.hexlify(parseInt(config.GAS_LIMIT)),
                 maxFeePerGas: ethers.utils.parseUnits(
-                    (MAX_FEE_PER_GAS || "100000000000").toString(), 
+                    (config.MAX_FEE_PER_GAS || "100000000000").toString(), 
                     "wei"
                 ),
                 maxPriorityFeePerGas: ethers.utils.parseUnits(
-                    (MAX_PRIORITY_FEE_PER_GAS || "100000000000").toString(), 
+                    (config.MAX_PRIORITY_FEE_PER_GAS || "100000000000").toString(), 
                     "wei"
                 )
             };
@@ -299,43 +310,50 @@ class BlockchainManager {
             
             // Keep recent transactions list manageable
             if (this.recentTransactions.length > 100) {
-                this.recentTransactions = this.recentTransactions.slice(-100);
+                this.recentTransactions = this.recentTransactions.slice(0, 100);
             }
-            
-            // Emit transaction event
-            this.transactionEvents.emit('transaction', txObject);
             
             // Wait for transaction to be mined
             console.log('Waiting for transaction to be mined...');
             const receipt = await transaction.wait();
-            console.log('Transaction mined in block:', receipt.blockNumber);
+            console.log('Transaction mined:', receipt);
             
             // Update transaction status
-            txObject.status = 'confirmed';
-            txObject.blockNumber = receipt.blockNumber;
+            const txIndex = this.allTransactions.findIndex(t => t.hash === transaction.hash);
+            if (txIndex !== -1) {
+                this.allTransactions[txIndex].status = 'confirmed';
+                this.allTransactions[txIndex].blockNumber = receipt.blockNumber;
+                this.allTransactions[txIndex].gasUsed = receipt.gasUsed.toString();
+            }
             
-            // Re-emit transaction event with updated status
-            this.transactionEvents.emit('transaction', txObject);
-            
-            // Resolve the promise
-            tx.resolve({ 
-                success: true, 
-                hash: transaction.hash, 
-                blockNumber: receipt.blockNumber 
+            // Emit transaction event for UI updates
+            this.transactionEvents.emit('transaction', {
+                ...txObject,
+                status: 'confirmed',
+                receipt
             });
             
-            console.log(`Transaction processed successfully: ${transaction.hash}`);
+            // Reset the flag
+            this.isSendingTransaction = false;
+            
+            // Resolve the promise with success
+            tx.resolve({ success: true, hash: transaction.hash, receipt });
+            
+            // Try to process the next transaction immediately
+            if (this.pendingTransactions.length > 0) {
+                this.processNextTransaction();
+            }
             
         } catch (error) {
             console.error('Error processing transaction:', error);
-            console.error('Error message:', error.message);
+            console.error('Error details:', error.message);
             if (error.code) {
                 console.error('Error code:', error.code);
             }
             
-            // Create an error transaction object for UI
+            // Create error transaction for UI
             const errorTx = {
-                hash: null,
+                hash: `error-${Date.now()}`,
                 actionType: tx.actionType,
                 timestamp: tx.timestamp,
                 status: 'error',
@@ -344,22 +362,17 @@ class BlockchainManager {
             
             this.allTransactions.unshift(errorTx);
             
-            // Emit transaction error event
-            this.transactionEvents.emit('transactionError', {
-                actionType: tx.actionType,
-                error: error.message,
-                code: error.code
-            });
+            // Emit transaction error event for UI updates
+            this.transactionEvents.emit('transactionError', errorTx);
             
-            // Reject the promise
-            tx.reject(error);
-        } finally {
-            // Reset flag to allow next transaction
+            // Reset the flag
             this.isSendingTransaction = false;
             
-            // Process next transaction if any
+            // Reject the promise with error
+            tx.reject({ success: false, error: error.message });
+            
+            // Try to process the next transaction after a short delay
             if (this.pendingTransactions.length > 0) {
-                console.log('Processing next transaction in queue');
                 setTimeout(() => this.processNextTransaction(), 1000);
             }
         }
@@ -370,10 +383,10 @@ class BlockchainManager {
         console.log(`Minting championship trophy for ${winnerAddress}`);
         
         if (this.mockMode) {
-            console.log(`[MOCK] Minting trophy for: ${winnerAddress}`);
-            const mockTxHash = `mock-trophy-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+            console.log(`[MOCK] Minting championship trophy for ${winnerAddress}`);
+            const mockTxHash = `mock-mint-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
             
-            // Add to transactions list
+            // Add to transactions list for UI
             const mockTx = {
                 hash: mockTxHash,
                 actionType: 'mintTrophy',
@@ -384,37 +397,46 @@ class BlockchainManager {
             
             this.allTransactions.unshift(mockTx);
             
-            // Emit transaction event
+            // Emit transaction event for UI updates
             this.transactionEvents.emit('transaction', mockTx);
             
             return { success: true, hash: mockTxHash };
         }
         
+        // Check if we're connected
         if (!this.connected || !this.contract) {
             console.error('Not connected to blockchain');
             return { success: false, error: 'Not connected to blockchain' };
         }
         
         try {
-            // Prepare gas parameters - increased values for Monad compatibility
-            const gasLimit = ethers.utils.hexlify(parseInt(GAS_LIMIT || process.env.GAS_LIMIT || 3000000));
-            const maxFeePerGas = ethers.utils.hexlify(parseInt(MAX_FEE_PER_GAS || process.env.MAX_FEE_PER_GAS || 100000000000)); // 100 gwei
-            const maxPriorityFeePerGas = ethers.utils.hexlify(parseInt(MAX_PRIORITY_FEE_PER_GAS || process.env.MAX_PRIORITY_FEE_PER_GAS || 100000000000)); // 100 gwei
+            if (!ethers) {
+                throw new Error("Ethers library not available");
+            }
+            // Prepare transaction parameters with appropriate gas settings
+            const overrides = {
+                gasLimit: ethers.utils.hexlify(parseInt(config.GAS_LIMIT || process.env.GAS_LIMIT || 3000000)),
+                maxFeePerGas: ethers.utils.parseUnits(
+                    (config.MAX_FEE_PER_GAS || process.env.MAX_FEE_PER_GAS || "100000000000").toString(), 
+                    "wei"
+                ),
+                maxPriorityFeePerGas: ethers.utils.parseUnits(
+                    (config.MAX_PRIORITY_FEE_PER_GAS || process.env.MAX_PRIORITY_FEE_PER_GAS || "100000000000").toString(), 
+                    "wei"
+                )
+            };
             
-            // Call the contract method
-            const nonce = await this.provider.getTransactionCount(this.wallet.address, "pending");
-            console.log('Using nonce:', nonce);
-            
-            const transaction = await this.contract.mintTrophy(winnerAddress, {
-                gasLimit,
-                maxFeePerGas,
-                maxPriorityFeePerGas,
-                nonce
+            console.log('Trophy minting gas parameters:', {
+                gasLimit: overrides.gasLimit.toString(),
+                maxFeePerGas: ethers.utils.formatUnits(overrides.maxFeePerGas, "gwei") + " gwei",
+                maxPriorityFeePerGas: ethers.utils.formatUnits(overrides.maxPriorityFeePerGas, "gwei") + " gwei"
             });
             
+            // Call the contract method to mint trophy
+            const transaction = await this.contract.mintTrophy(winnerAddress, overrides);
             console.log('Trophy mint transaction sent:', transaction.hash);
             
-            // Track this transaction
+            // Add to all transactions list for UI
             const txObject = {
                 hash: transaction.hash,
                 actionType: 'mintTrophy',
@@ -425,28 +447,37 @@ class BlockchainManager {
             
             this.allTransactions.unshift(txObject);
             
-            // Emit transaction event
+            // Emit transaction event for UI updates
             this.transactionEvents.emit('transaction', txObject);
             
             // Wait for transaction to be mined
+            console.log('Waiting for trophy mint transaction to be mined...');
             const receipt = await transaction.wait();
             console.log('Trophy mint transaction mined:', receipt);
             
             // Update transaction status
-            txObject.status = 'confirmed';
-            txObject.blockNumber = receipt.blockNumber;
+            const txIndex = this.allTransactions.findIndex(t => t.hash === transaction.hash);
+            if (txIndex !== -1) {
+                this.allTransactions[txIndex].status = 'confirmed';
+                this.allTransactions[txIndex].blockNumber = receipt.blockNumber;
+                this.allTransactions[txIndex].gasUsed = receipt.gasUsed.toString();
+            }
             
-            // Re-emit transaction event
-            this.transactionEvents.emit('transaction', txObject);
-            
-            return { 
-                success: true, 
-                hash: transaction.hash,
+            // Emit transaction event for UI updates
+            this.transactionEvents.emit('transaction', {
+                ...txObject,
+                status: 'confirmed',
                 receipt
-            };
+            });
+            
+            return { success: true, hash: transaction.hash, receipt };
             
         } catch (error) {
             console.error('Error minting trophy:', error);
+            console.error('Error details:', error.message);
+            if (error.code) {
+                console.error('Error code:', error.code);
+            }
             
             // Add to all transactions with error
             const errorTx = {
@@ -468,7 +499,7 @@ class BlockchainManager {
     
     // Helper method to get the MONAD cost for an action
     getActionCost(actionType) {
-        return ACTION_COSTS[actionType] || 0;
+        return config.ACTION_COSTS[actionType] || 0;
     }
     
     // Get recent transactions for UI display

@@ -5,6 +5,13 @@
 [build.environment]
   NODE_VERSION = "18"
   NPM_FLAGS = "--legacy-peer-deps"
+  ENABLE_MOCK_MODE = "true"
+  MONAD_TESTNET_RPC = "https://rpc.testnet-m1.monad.xyz/m1"
+  CONTRACT_ADDRESS = "0x0000000000000000000000000000000000000000"
+  CHAIN_ID = "1331"
+  GAS_LIMIT = "3000000"
+  MAX_FEE_PER_GAS = "100000000000"
+  MAX_PRIORITY_FEE_PER_GAS = "100000000000"
 
 [[redirects]]
   from = "/*"
