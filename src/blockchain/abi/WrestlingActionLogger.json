@@ -1,0 +1,15 @@
+[
+  "event ActionLogged(address indexed player, string character, string action, uint256 timestamp)",
+  "event AttackLogged(address indexed player, string attacker, string target, uint256 damage, uint256 timestamp)",
+  "event SpecialMoveUsed(address indexed player, string character, string moveName, uint256 timestamp)",
+  "event WakandaEnergyReleased(address indexed player, string character, uint256 energyLevel, uint256 timestamp)",
+  "event PlayerDefeated(address indexed player, string winner, string defeated, uint256 timestamp)",
+  "event RoundCompleted(address indexed player, string winner, uint256 timestamp)",
+  "function logAction(string memory character, string memory action) public",
+  "function logAttack(string memory attacker, string memory target, uint256 damage) public",
+  "function logSpecialMove(string memory character, string memory moveName) public",
+  "function logWakandaEnergy(string memory character, uint256 energyLevel) public",
+  "function logDefeat(string memory winner, string memory defeated) public",
+  "function logRoundCompleted(string memory winner) public",
+  "function getCharacterStats(string memory character) public view returns (uint256, uint256, uint256)"
+]

@@ -1,0 +1,258 @@
+/* Main Game Styles */
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    color: #fff;
+}
+
+canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* UI Elements */
+#game-ui {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+/* Blockchain Transaction Indicators */
+.blockchain-indicator {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    background-color: rgba(0, 0, 0, 0.7);
+    border: 1px solid #3498db;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 14px;
+    max-width: 300px;
+    color: #fff;
+    z-index: 100;
+}
+
+.transaction-status {
+    font-weight: bold;
+    color: #3498db;
+    margin-top: 5px;
+}
+
+.pending-transaction {
+    color: #f39c12;
+}
+
+.completed-transaction {
+    color: #2ecc71;
+}
+
+.failed-transaction {
+    color: #e74c3c;
+}
+
+/* Championship Trophy UI */
+#nft-trophy {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    background-color: rgba(0, 0, 0, 0.8);
+    border: 2px solid #f1c40f;
+    border-radius: 10px;
+    padding: 15px;
+    color: #f1c40f;
+    display: none;
+    max-width: 250px;
+    text-align: center;
+}
+
+#nft-trophy img {
+    width: 100px;
+    height: 100px;
+    display: block;
+    margin: 0 auto 10px;
+}
+
+/* Game Over Screen */
+#game-over {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+#winner-display {
+    background-color: #3498db;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#transaction-status {
+    padding: 15px;
+    background-color: rgba(0, 0, 0, 0.7);
+    border-radius: 5px;
+    max-width: 400px;
+    text-align: center;
+}
+
+/* Blockchain Cost Indicators */
+.action-cost {
+    position: absolute;
+    bottom: 5px;
+    font-size: 12px;
+    color: #3498db;
+    padding: 2px 5px;
+    background-color: rgba(0, 0, 0, 0.6);
+    border-radius: 3px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.action-cost.visible {
+    opacity: 1;
+}
+
+/* Transaction Indicator Styles */
+#transaction-indicator {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: rgba(0, 0, 0, 0.85);
+    border: 1px solid #00c853;
+    border-radius: 5px;
+    padding: 15px;
+    font-size: 14px;
+    max-width: 350px;
+    color: #fff;
+    z-index: 1000;
+    font-family: 'Courier New', monospace;
+    box-shadow: 0 0 15px rgba(0, 200, 83, 0.4);
+    transition: all 0.3s ease;
+}
+
+#transaction-indicator:hover {
+    background-color: rgba(0, 0, 0, 0.95);
+    box-shadow: 0 0 20px rgba(0, 200, 83, 0.6);
+}
+
+#transaction-count {
+    color: #00c853;
+    font-weight: bold;
+    margin-bottom: 5px;
+    font-size: 16px;
+}
+
+#contract-address {
+    font-size: 12px;
+    color: #4fc3f7;
+    margin-bottom: 10px;
+    word-break: break-all;
+}
+
+#transaction-list {
+    max-height: 150px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #00c853 #111;
+    margin-top: 10px;
+}
+
+#transaction-list::-webkit-scrollbar {
+    width: 5px;
+}
+
+#transaction-list::-webkit-scrollbar-track {
+    background: #111;
+}
+
+#transaction-list::-webkit-scrollbar-thumb {
+    background-color: #00c853;
+    border-radius: 10px;
+}
+
+.transaction-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 5px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 12px;
+}
+
+.transaction-item .tx-hash {
+    color: #4fc3f7;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.transaction-item .tx-type {
+    color: #f9a825;
+    text-transform: uppercase;
+    margin: 0 8px;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+.transaction-item .tx-status {
+    color: #ff9800;
+    border-radius: 3px;
+    padding: 2px 5px;
+    font-size: 10px;
+    min-width: 60px;
+    text-align: center;
+}
+
+.transaction-item .tx-status.confirmed {
+    color: #00c853;
+    background-color: rgba(0, 200, 83, 0.2);
+}
+
+.transaction-item .tx-status.pending {
+    color: #ff9800;
+    background-color: rgba(255, 152, 0, 0.2);
+}
+
+.transaction-item .tx-status.error,
+.transaction-item .tx-status.failed {
+    color: #f44336;
+    background-color: rgba(244, 67, 54, 0.2);
+}
+
+.transaction-item .tx-status.mock, 
+.transaction-item .tx-status.simulated {
+    color: #9c27b0;
+    background-color: rgba(156, 39, 176, 0.2);
+}
+
+.transaction-item .tx-error {
+    color: #f44336;
+    font-size: 10px;
+    margin-top: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 150px;
+}
+
+.transaction-item.transaction-error {
+    background-color: rgba(244, 67, 54, 0.1);
+} 

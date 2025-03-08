@@ -1,0 +1,438 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+body {
+    background-color: #000;
+    color: #fff;
+    overflow: hidden;
+}
+
+#game-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+}
+
+#game-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+/* Loading Screen */
+#loading-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(to bottom, #1a1a2e, #16213e, #0f3460);
+    z-index: 10;
+}
+
+#loading-screen h1 {
+    font-size: 3rem;
+    margin-bottom: 2rem;
+    color: #e94560;
+    text-shadow: 0 0 10px #e94560;
+    text-transform: uppercase;
+}
+
+.loading-bar-container {
+    width: 50%;
+    height: 30px;
+    border: 2px solid #e94560;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+#loading-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(to right, #e94560, #ff9677);
+    transition: width 0.5s;
+}
+
+#loading-text {
+    margin-top: 1rem;
+    font-size: 1.2rem;
+    color: #ff9677;
+}
+
+/* Character Select Screen */
+#character-select {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(to bottom, #1a1a2e, #16213e, #0f3460);
+    z-index: 9;
+}
+
+#character-select h2 {
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+    color: #e94560;
+    text-shadow: 0 0 10px #e94560;
+}
+
+.character-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.character-card {
+    width: 200px;
+    height: 250px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 2px solid #e94560;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.character-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px #e94560;
+}
+
+.character-card.selected {
+    background-color: rgba(233, 69, 96, 0.3);
+    box-shadow: 0 0 20px #e94560;
+}
+
+.character-card img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 50%;
+    margin-bottom: 1rem;
+    background-color: #333;
+}
+
+.character-card h3 {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+}
+
+.character-card p {
+    font-size: 0.9rem;
+    color: #ff9677;
+}
+
+#start-game {
+    padding: 1rem 2rem;
+    font-size: 1.5rem;
+    background-color: #e94560;
+    color: white;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+    text-transform: uppercase;
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+
+#start-game:hover {
+    background-color: #ff9677;
+    transform: scale(1.1);
+}
+
+/* HUD */
+#hud {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 1rem;
+    z-index: 2;
+}
+
+#health-bars {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 0.5rem;
+}
+
+.health-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 20%;
+}
+
+.health-container span {
+    font-size: 0.9rem;
+    margin-bottom: 0.3rem;
+}
+
+.health-bar {
+    width: 100%;
+    height: 15px;
+    background-color: #333;
+    border: 1px solid #e94560;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+}
+
+.health-bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: var(--health-percent, 100%);
+    height: 100%;
+    background-color: #e94560;
+    transition: width 0.3s;
+}
+
+.crypto-clout-meter {
+    width: 100%;
+    height: 8px;
+    background-color: #333;
+    border: 1px solid #4bc0c0;
+    border-radius: 4px;
+    margin-top: 5px;
+    overflow: hidden;
+    position: relative;
+}
+
+.crypto-clout-meter::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: var(--clout-percent, 0%);
+    height: 100%;
+    background-color: #4bc0c0;
+    transition: width 0.3s;
+}
+
+#controls-hint {
+    position: absolute;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+}
+
+#controls-hint p {
+    font-size: 0.8rem;
+    color: #ddd;
+}
+
+/* Game Over Screen */
+#game-over {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 8;
+}
+
+#game-over h2 {
+    font-size: 4rem;
+    margin-bottom: 2rem;
+    color: gold;
+    text-shadow: 0 0 20px gold;
+}
+
+#winner-display {
+    width: 250px;
+    height: 250px;
+    border-radius: 50%;
+    border: 5px solid gold;
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #111;
+    box-shadow: 0 0 30px gold;
+}
+
+#nft-reward {
+    padding: 1rem;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+#transaction-status {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: #4bc0c0;
+}
+
+#play-again {
+    padding: 1rem 2rem;
+    font-size: 1.2rem;
+    background-color: #e94560;
+    color: white;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+#play-again:hover {
+    background-color: #ff9677;
+    transform: scale(1.1);
+}
+
+/* Controls info on character select screen */
+.controls-info {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 2px solid #e94560;
+    border-radius: 10px;
+    padding: 1rem;
+    margin: 1rem 0;
+    max-width: 500px;
+}
+
+.controls-info h3 {
+    color: #e94560;
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+.controls-info ul {
+    list-style-type: none;
+    margin-bottom: 1rem;
+}
+
+.controls-info li {
+    margin-bottom: 0.3rem;
+    color: #ddd;
+}
+
+.controls-info p {
+    color: #ff9677;
+    text-align: center;
+    font-weight: bold;
+}
+
+/* Help button in HUD */
+.help-button {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #e94560;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 0 10px rgba(233, 69, 96, 0.5);
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.help-button:hover {
+    background-color: #ff9677;
+    transform: scale(1.1);
+}
+
+/* Instructions overlay */
+#instructions-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    z-index: 20;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.instructions-content {
+    background-color: #16213e;
+    border: 3px solid #e94560;
+    border-radius: 15px;
+    padding: 2rem;
+    max-width: 500px;
+    box-shadow: 0 0 30px rgba(233, 69, 96, 0.5);
+}
+
+.instructions-content h2 {
+    color: #e94560;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.instructions-content h3 {
+    color: #ff9677;
+    margin: 1rem 0 0.5rem;
+}
+
+.instructions-content ul {
+    list-style-type: none;
+    margin-bottom: 1rem;
+}
+
+.instructions-content li {
+    margin-bottom: 0.5rem;
+    color: #ddd;
+}
+
+.instructions-content p {
+    color: #fff;
+    margin-bottom: 1.5rem;
+}
+
+#close-instructions {
+    display: block;
+    margin: 0 auto;
+    padding: 0.7rem 1.5rem;
+    background-color: #e94560;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+#close-instructions:hover {
+    background-color: #ff9677;
+    transform: scale(1.05);
+} 

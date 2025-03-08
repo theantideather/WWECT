@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' 'unsafe-eval'; connect-src *;">
+    <title>Crypto Twitter Champion</title>
+    <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+    <div id="game-container">
+        <div id="loading-screen">
+            <h1>Crypto Twitter Champion</h1>
+            <div class="loading-bar-container">
+                <div id="loading-bar"></div>
+            </div>
+            <div id="loading-text">Loading assets... 0%</div>
+        </div>
+        <div id="character-select" style="display: none;">
+            <h2>Select Your Fighter</h2>
+            <div class="character-grid">
+                <div class="character-card" data-character="trump">
+                    <img src="./assets/textures/trump_icon.png" alt="Donald Trump">
+                    <h3>Donald Trump</h3>
+                    <p>Special: MAGA Slam</p>
+                </div>
+                <div class="character-card" data-character="vitalik">
+                    <img src="./assets/textures/vitalik_icon.png" alt="Vitalik Buterin">
+                    <h3>Vitalik Buterin</h3>
+                    <p>Special: Smart Contract Throw</p>
+                </div>
+                <div class="character-card" data-character="kanye">
+                    <img src="./assets/textures/kanye_icon.png" alt="Kanye West">
+                    <h3>Kanye West</h3>
+                    <p>Special: 808 Dropkick</p>
+                </div>
+                <div class="character-card" data-character="sbf">
+                    <img src="./assets/textures/sbf_icon.png" alt="SBF">
+                    <h3>Sam Bankman-Fried</h3>
+                    <p>Special: Alameda Suplex</p>
+                </div>
+            </div>
+            <div class="controls-info">
+                <h3>Controls</h3>
+                <ul>
+                    <li><strong>WASD/Arrows:</strong> Move around the ring</li>
+                    <li><strong>W/Up:</strong> Jump</li>
+                    <li><strong>E:</strong> Attack</li>
+                    <li><strong>Space:</strong> Special Move (when Crypto Clout meter is full)</li>
+                    <li><strong>Mouse:</strong> Control camera</li>
+                </ul>
+                <p>Defeat your opponents to become the Crypto Twitter Champion!</p>
+            </div>
+            <button id="start-game">FIGHT!</button>
+        </div>
+        <div id="hud" style="display: none;">
+            <div id="health-bar-container">
+                <div class="player-info">
+                    <div id="player-name">PLAYER</div>
+                    <div id="health-bar"></div>
+                </div>
+                <div class="opponent-info">
+                    <div id="opponent-name">OPPONENT</div>
+                    <div id="opponent-health-bar"></div>
+                </div>
+            </div>
+            <div id="controls-hint">
+                <div>WASD - Move</div>
+                <div>SPACE - Jump</div>
+                <div>E - Grapple</div>
+                <div>R - Special Move</div>
+            </div>
+            <div id="blockchain-status">
+                <div id="network-indicator">MONAD TESTNET</div>
+            </div>
+            <button id="help-button">?</button>
+        </div>
+        <div id="instructions-overlay" style="display: none;">
+            <div id="instructions-container">
+                <h2>Game Controls</h2>
+                <div class="instruction">
+                    <div class="key">WASD</div>
+                    <div class="action">Move your wrestler</div>
+                </div>
+                <div class="instruction">
+                    <div class="key">SPACE</div>
+                    <div class="action">Jump</div>
+                </div>
+                <div class="instruction">
+                    <div class="key">E</div>
+                    <div class="action">Grapple with opponent</div>
+                </div>
+                <div class="instruction">
+                    <div class="key">R</div>
+                    <div class="action">Perform special move</div>
+                </div>
+                <div class="instruction">
+                    <div class="key">1-4</div>
+                    <div class="action">Perform special moves (when available)</div>
+                </div>
+                <h3>Game Objective</h3>
+                <p>Defeat all opponents to become the Crypto Champion! Each action is recorded on the Monad blockchain.</p>
+                <button id="close-instructions">CLOSE</button>
+            </div>
+        </div>
+        <div id="battle-notification" style="display: none;"></div>
+        <div id="game-over" style="display: none;">
+            <h2 id="game-over-title">GAME OVER</h2>
+            <p id="game-over-message"></p>
+            <div id="winner-display"></div>
+            <div id="nft-reward">
+                <p>Minting Trophy NFT on Monad Testnet...</p>
+                <div id="transaction-status"></div>
+            </div>
+            <button id="play-again">PLAY AGAIN</button>
+        </div>
+        <canvas id="game-canvas"></canvas>
+    </div>
+    
+    <div id="transaction-indicator">
+        <div id="transaction-count">MONAD Transactions: 0</div>
+        <div>Contract: <span id="contract-address">Loading...</span></div>
+        <div id="connection-status">Connecting to blockchain...</div>
+        <div id="transaction-list"></div>
+    </div>
+    
+    <script type="module" src="./src/main.js"></script>
+</body>
+</html> 
