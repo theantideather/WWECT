@@ -34,8 +34,8 @@ module.exports = {
       chainId: CHAIN_ID,
       gasPrice: "auto",
       gas: parseInt(process.env.GAS_LIMIT || "3000000"),
-      maxFeePerGas: parseInt(process.env.MAX_FEE_PER_GAS || "1000000000") * 10, // Multiply by 10 to ensure it's high enough
-      maxPriorityFeePerGas: parseInt(process.env.MAX_PRIORITY_FEE_PER_GAS || "1000000000") * 10, // Multiply by 10 to ensure it's high enough
+      maxFeePerGas: parseInt(process.env.MAX_FEE_PER_GAS || "100000000000"), 
+      maxPriorityFeePerGas: parseInt(process.env.MAX_PRIORITY_FEE_PER_GAS || "100000000000"),
     },
     // Hardhat local network for testing
     hardhat: {

@@ -12,21 +12,42 @@ export default defineConfig(({ mode }) => {
   
   console.log('Loaded env ENABLE_MOCK_MODE:', env.ENABLE_MOCK_MODE);
   
+  // Default environment variables for Netlify
+  const defaultEnv = {
+    MONAD_TESTNET_RPC: "https://rpc.testnet-m1.monad.xyz/m1",
+    CONTRACT_ADDRESS: "0x0000000000000000000000000000000000000000",
+    WALLET_ADDRESS: "",
+    ENABLE_MOCK_MODE: "true",
+    PRIVATE_KEY: "",
+    GAS_LIMIT: "3000000",
+    MAX_PRIORITY_FEE_PER_GAS: "100000000000",
+    MAX_FEE_PER_GAS: "100000000000",
+    CHAIN_ID: "1331",
+    MAX_TX_PER_MINUTE: "100",
+    THROTTLE_INTERVAL: "5000",
+  };
+  
+  // Use env variables or fallback to defaults
+  const resolvedEnv = {};
+  Object.keys(defaultEnv).forEach(key => {
+    resolvedEnv[key] = env[key] || defaultEnv[key];
+  });
+  
   return {
     // Expose .env variables to your Vite app
     define: {
       'process.env': {
-        MONAD_TESTNET_RPC: JSON.stringify(env.MONAD_TESTNET_RPC || "https://testnet-rpc.monad.xyz/"),
-        CONTRACT_ADDRESS: JSON.stringify(env.CONTRACT_ADDRESS || ""),
-        WALLET_ADDRESS: JSON.stringify(env.WALLET_ADDRESS || ""),
-        ENABLE_MOCK_MODE: JSON.stringify(env.ENABLE_MOCK_MODE === "true"),
-        PRIVATE_KEY: JSON.stringify(env.PRIVATE_KEY || ""),
-        GAS_LIMIT: JSON.stringify(env.GAS_LIMIT || "3000000"),
-        MAX_PRIORITY_FEE_PER_GAS: JSON.stringify(env.MAX_PRIORITY_FEE_PER_GAS || "100000000000"),
-        MAX_FEE_PER_GAS: JSON.stringify(env.MAX_FEE_PER_GAS || "100000000000"),
-        CHAIN_ID: JSON.stringify(env.CHAIN_ID || "10143"),
-        MAX_TX_PER_MINUTE: JSON.stringify(env.MAX_TX_PER_MINUTE || "100"),
-        THROTTLE_INTERVAL: JSON.stringify(env.THROTTLE_INTERVAL || "5000"),
+        MONAD_TESTNET_RPC: JSON.stringify(resolvedEnv.MONAD_TESTNET_RPC),
+        CONTRACT_ADDRESS: JSON.stringify(resolvedEnv.CONTRACT_ADDRESS),
+        WALLET_ADDRESS: JSON.stringify(resolvedEnv.WALLET_ADDRESS),
+        ENABLE_MOCK_MODE: JSON.stringify(resolvedEnv.ENABLE_MOCK_MODE === "true"),
+        PRIVATE_KEY: JSON.stringify(resolvedEnv.PRIVATE_KEY),
+        GAS_LIMIT: JSON.stringify(resolvedEnv.GAS_LIMIT),
+        MAX_PRIORITY_FEE_PER_GAS: JSON.stringify(resolvedEnv.MAX_PRIORITY_FEE_PER_GAS),
+        MAX_FEE_PER_GAS: JSON.stringify(resolvedEnv.MAX_FEE_PER_GAS),
+        CHAIN_ID: JSON.stringify(resolvedEnv.CHAIN_ID),
+        MAX_TX_PER_MINUTE: JSON.stringify(resolvedEnv.MAX_TX_PER_MINUTE),
+        THROTTLE_INTERVAL: JSON.stringify(resolvedEnv.THROTTLE_INTERVAL),
       }
     },
     
@@ -44,7 +65,7 @@ export default defineConfig(({ mode }) => {
       proxy: {
         // Proxy Monad RPC requests if needed
         '/monad-rpc': {
-          target: env.MONAD_TESTNET_RPC || 'https://testnet-rpc.monad.xyz/',
+          target: resolvedEnv.MONAD_TESTNET_RPC,
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/monad-rpc/, ''),
           secure: false
@@ -62,8 +83,7 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         output: {
           manualChunks: {
-            'ethers': ['ethers'],
-            'three': ['three'],
+            'vendor': ['ethers', 'three'],
           }
         }
       }
@@ -75,6 +95,7 @@ export default defineConfig(({ mode }) => {
     },
     optimizeDeps: {
       include: ['three', 'ethers'],
+      exclude: [],
       esbuildOptions: {
         target: 'es2020'
       }
