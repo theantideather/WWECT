@@ -53,6 +53,50 @@ document.addEventListener('DOMContentLoaded', () => {
         contractAddress.innerHTML = `<a href="https://explorer.testnet.monad.xyz/address/${address}" target="_blank">${shortAddress}</a>`;
     }
     
+    // Function to generate random transaction hash
+    const generateRandomHash = () => {
+        const characters = '0123456789abcdef';
+        let hash = '0x';
+        for (let i = 0; i < 64; i++) {
+            hash += characters.charAt(Math.floor(Math.random() * characters.length));
+        }
+        return hash;
+    };
+    
+    // Types of mock transactions to show
+    const mockTransactionTypes = [
+        "Trophy Mint", 
+        "Move Recorded", 
+        "Match Result", 
+        "Special Move", 
+        "Character Selection",
+        "Block Verification",
+        "Score Update"
+    ];
+    
+    // Function to add a mock transaction
+    const addMockTransaction = () => {
+        const hash = generateRandomHash();
+        const actionType = mockTransactionTypes[Math.floor(Math.random() * mockTransactionTypes.length)];
+        const mockTx = {
+            hash: hash,
+            actionType: actionType,
+            status: Math.random() > 0.8 ? 'pending' : 'confirmed',
+            timestamp: Date.now(),
+            mock: true
+        };
+        
+        // Add to transaction list using the same handler as real transactions
+        game.blockchainManager.emitTransactionEvent(mockTx);
+        
+        // Schedule next mock transaction
+        const delay = 5000 + Math.random() * 15000; // Random delay between 5-20 seconds
+        setTimeout(addMockTransaction, delay);
+    };
+    
+    // Start adding mock transactions after a delay
+    setTimeout(addMockTransaction, 10000);
+    
     // Update connection status
     const updateConnectionStatus = () => {
         const status = document.getElementById('connection-status');
@@ -119,6 +163,17 @@ document.addEventListener('DOMContentLoaded', () => {
             while (txList.children.length > 10) {
                 txList.removeChild(txList.lastChild);
             }
+        }
+    });
+    
+    // Setup Twitter share button
+    document.addEventListener('click', (e) => {
+        if (e.target.id === 'twitter-share' || e.target.closest('#twitter-share')) {
+            const winnerName = document.querySelector('#winner-display h3')?.textContent || 'a fighter';
+            const text = `I just played Crypto Twitter Champion and ${winnerName} was crowned champion! Can you beat that? #CryptoTwitterChampion #BlockchainGaming`;
+            const url = window.location.href;
+            const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+            window.open(twitterUrl, '_blank');
         }
     });
 }); 

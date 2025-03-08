@@ -113,6 +113,13 @@
                 <div id="transaction-status"></div>
             </div>
             <button id="play-again">PLAY AGAIN</button>
+            <div id="social-share">
+                <p>John Cena might follow you if you share this on Twitter!</p>
+                <button id="twitter-share" class="share-button">
+                    <img src="./assets/twitter-icon.png" alt="Twitter" width="24" height="24">
+                    Share on Twitter
+                </button>
+            </div>
         </div>
         <canvas id="game-canvas"></canvas>
     </div>
@@ -122,6 +129,10 @@
         <div>Contract: <span id="contract-address">Loading...</span></div>
         <div id="connection-status">Connecting to blockchain...</div>
         <div id="transaction-list"></div>
+    </div>
+    
+    <div id="creator-attribution">
+        Developed with ❤️ by <a href="https://x.com/omg14doteth?s=21" target="_blank">theantideather</a>
     </div>
     
     <script type="module" src="./src/main.js"></script>

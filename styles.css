@@ -37,37 +37,50 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background: linear-gradient(to bottom, #1a1a2e, #16213e, #0f3460);
+    background: url('./assets/wwe-background.jpg') center center no-repeat, linear-gradient(to bottom, #000000, #390000, #ba0001);
+    background-size: cover;
     z-index: 10;
+    text-align: center;
 }
 
 #loading-screen h1 {
-    font-size: 3rem;
+    font-size: 5rem;
     margin-bottom: 2rem;
-    color: #e94560;
-    text-shadow: 0 0 10px #e94560;
+    color: #ffdd00;
+    text-shadow: 
+        0 0 10px #ff0000,
+        -4px -4px 0 #000,
+        4px -4px 0 #000,
+        -4px 4px 0 #000,
+        4px 4px 0 #000;
     text-transform: uppercase;
+    font-family: 'Impact', sans-serif;
+    letter-spacing: 2px;
+    transform: skew(-5deg, 0);
 }
 
 .loading-bar-container {
     width: 50%;
     height: 30px;
-    border: 2px solid #e94560;
+    border: 3px solid #ffdd00;
     border-radius: 15px;
     overflow: hidden;
+    box-shadow: 0 0 20px rgba(255, 221, 0, 0.7);
 }
 
 #loading-bar {
     height: 100%;
     width: 0%;
-    background: linear-gradient(to right, #e94560, #ff9677);
+    background: linear-gradient(to right, #ff0000, #ffdd00);
     transition: width 0.5s;
 }
 
 #loading-text {
     margin-top: 1rem;
-    font-size: 1.2rem;
-    color: #ff9677;
+    font-size: 1.4rem;
+    color: #ffffff;
+    text-shadow: 2px 2px 4px #000000;
+    font-weight: bold;
 }
 
 /* Character Select Screen */
@@ -81,15 +94,26 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background: linear-gradient(to bottom, #1a1a2e, #16213e, #0f3460);
+    background: url('./assets/ring-background.jpg') center center no-repeat, linear-gradient(to bottom, #000000, #390000, #ba0001);
+    background-size: cover;
     z-index: 9;
+    padding: 20px;
 }
 
 #character-select h2 {
-    font-size: 2.5rem;
+    font-size: 4rem;
     margin-bottom: 2rem;
-    color: #e94560;
-    text-shadow: 0 0 10px #e94560;
+    color: #ffdd00;
+    text-shadow: 
+        0 0 10px #ff0000,
+        -4px -4px 0 #000,
+        4px -4px 0 #000,
+        -4px 4px 0 #000,
+        4px 4px 0 #000;
+    text-transform: uppercase;
+    font-family: 'Impact', sans-serif;
+    letter-spacing: 2px;
+    transform: skew(-5deg, 0);
 }
 
 .character-grid {
@@ -312,6 +336,48 @@ body {
     transform: scale(1.1);
 }
 
+/* Social Share */
+#social-share {
+    margin-top: 20px;
+    text-align: center;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 15px;
+    border: 2px solid #1da1f2;
+    max-width: 350px;
+}
+
+#social-share p {
+    color: #ffffff;
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+    font-weight: bold;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+}
+
+.share-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background-color: #1da1f2;
+    color: white;
+    border: none;
+    border-radius: 30px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin: 0 auto;
+}
+
+.share-button:hover {
+    background-color: #0c85d0;
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(29, 161, 242, 0.7);
+}
+
 /* Controls info on character select screen */
 .controls-info {
     background-color: rgba(255, 255, 255, 0.1);
@@ -435,4 +501,31 @@ body {
 #close-instructions:hover {
     background-color: #ff9677;
     transform: scale(1.05);
+}
+
+/* Creator Attribution */
+#creator-attribution {
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+    z-index: 9999;
+    border: 2px solid #ff9677;
+    box-shadow: 0 0 10px rgba(233, 69, 96, 0.5);
+}
+
+#creator-attribution a {
+    color: #e94560;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s;
+}
+
+#creator-attribution a:hover {
+    color: #ff9677;
+    text-decoration: underline;
 } 

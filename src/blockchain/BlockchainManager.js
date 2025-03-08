@@ -516,7 +516,38 @@ class BlockchainManager {
         });
     }
     
-    // Add method to subscribe to transaction events
+    // Utility methods
+    
+    /**
+     * Generates a transaction hash that looks like a real one
+     */
+    generateMockTransactionHash() {
+        const characters = '0123456789abcdef';
+        let hash = '0x';
+        for (let i = 0; i < 64; i++) {
+            hash += characters.charAt(Math.floor(Math.random() * characters.length));
+        }
+        return hash;
+    }
+    
+    /**
+     * Manually emit a transaction event (useful for mock transactions)
+     * @param {Object} transaction The transaction to emit
+     */
+    emitTransactionEvent(transaction) {
+        // Add this transaction to our internal list
+        this.allTransactions.push(transaction);
+        
+        // Emit the transaction event
+        this.transactionEvents.emit('transaction', transaction);
+        
+        return transaction;
+    }
+    
+    /**
+     * Subscribe to transaction events
+     * @param {Function} callback Function to call when a transaction occurs
+     */
     onTransaction(callback) {
         this.transactionEvents.on('transaction', callback);
     }
