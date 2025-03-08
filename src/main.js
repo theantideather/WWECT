@@ -3,6 +3,24 @@ import BlockchainManager from './blockchain/BlockchainManager.js';
 
 // Wait for DOM to be loaded before initializing the game
 document.addEventListener('DOMContentLoaded', () => {
+    // Ensure theme song is ready to play
+    const soundcloudFrame = document.getElementById('theme-song');
+    if (soundcloudFrame) {
+        // Force the src to have autoplay enabled
+        let src = soundcloudFrame.src;
+        if (src.includes('auto_play=false')) {
+            src = src.replace('auto_play=false', 'auto_play=true');
+            soundcloudFrame.src = src;
+        }
+        
+        // Try to use the SoundCloud Widget API
+        window.addEventListener('message', (event) => {
+            if (event.origin.includes('soundcloud.com')) {
+                console.log('SoundCloud message received:', event.data);
+            }
+        });
+    }
+    
     const loadingBar = document.getElementById('loading-bar');
     const loadingText = document.getElementById('loading-text');
     const characterSelect = document.getElementById('character-select');
@@ -116,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 transactionIndicator.style.color = '#fff';
                 transactionIndicator.style.zIndex = '1000';
                 transactionIndicator.style.fontFamily = 'monospace';
-                transactionIndicator.style.display = 'none'; // Initially hidden
+                transactionIndicator.style.display = 'block'; // Make visible by default
                 
                 document.body.appendChild(transactionIndicator);
             }
@@ -154,6 +172,36 @@ document.addEventListener('DOMContentLoaded', () => {
                             const transactionIndicator = document.getElementById('transaction-indicator');
                             if (transactionIndicator) {
                                 transactionIndicator.style.display = 'block';
+                            }
+                            
+                            // Play John Cena's theme song
+                            try {
+                                const soundcloudFrame = document.getElementById('theme-song');
+                                if (soundcloudFrame) {
+                                    // Get the iframe's content window
+                                    const frameWindow = soundcloudFrame.contentWindow;
+                                    
+                                    // Set autoplay to true in the iframe src
+                                    let src = soundcloudFrame.src;
+                                    if (src.includes('auto_play=false')) {
+                                        src = src.replace('auto_play=false', 'auto_play=true');
+                                        soundcloudFrame.src = src;
+                                    }
+                                    
+                                    // Try to interact with the SoundCloud Widget API if available
+                                    setTimeout(() => {
+                                        try {
+                                            if (frameWindow.SC && frameWindow.SC.Widget) {
+                                                const widget = frameWindow.SC.Widget(soundcloudFrame);
+                                                widget.play();
+                                            }
+                                        } catch (err) {
+                                            console.log('Unable to use SoundCloud Widget API', err);
+                                        }
+                                    }, 1000);
+                                }
+                            } catch (e) {
+                                console.error('Error playing theme song:', e);
                             }
                             
                             // Start the game with a random character

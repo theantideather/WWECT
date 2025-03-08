@@ -170,9 +170,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('click', (e) => {
         if (e.target.id === 'twitter-share' || e.target.closest('#twitter-share')) {
             const winnerName = document.querySelector('#winner-display h3')?.textContent || 'a fighter';
-            const text = `I just played Crypto Twitter Champion and ${winnerName} was crowned champion! Can you beat that? #CryptoTwitterChampion #BlockchainGaming`;
-            const url = window.location.href;
-            const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+            const gameUrl = "https://wwecryptotwitter.netlify.app";
+            const text = `Play this game so that John Cena follows you! ${gameUrl} - I just played Crypto Twitter Champion and ${winnerName} was crowned champion! #WWECrypto #BlockchainGaming`;
+            const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
             window.open(twitterUrl, '_blank');
         }
     });

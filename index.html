@@ -6,8 +6,16 @@
     <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' 'unsafe-eval'; connect-src *;">
     <title>Crypto Twitter Champion</title>
     <link rel="stylesheet" href="./styles.css">
+    <!-- Add SoundCloud Widget API -->
+    <script src="https://w.soundcloud.com/player/api.js"></script>
 </head>
 <body>
+    <!-- John Cena Theme Song - Hidden but will play when game starts -->
+    <div id="theme-song-container" style="display:none;">
+        <iframe id="theme-song" width="0" height="0" scrolling="no" frameborder="no" allow="autoplay" 
+        src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/1215194260&color=%23ff5500&auto_play=true&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=false"></iframe>
+    </div>
+
     <div id="game-container">
         <div id="loading-screen">
             <h1>Crypto Twitter Champion</h1>

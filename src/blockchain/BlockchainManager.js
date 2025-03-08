@@ -141,6 +141,9 @@ class BlockchainManager {
             // Start processing queued transactions
             this.startTransactionProcessor();
             
+            // Start generating visual mock transactions for UI purposes (separate from actual mockMode)
+            this.startVisualMockTransactions();
+            
         } catch (error) {
             console.error('Failed to initialize blockchain connection:', error);
             console.error('Error details:', error.message);
@@ -555,6 +558,49 @@ class BlockchainManager {
     // Add method to subscribe to transaction error events
     onTransactionError(callback) {
         this.transactionEvents.on('transactionError', callback);
+    }
+    
+    // Start generating mock transactions for visual purposes only
+    startVisualMockTransactions() {
+        console.log('Starting visual mock transactions for UI');
+        
+        // Types of mock transactions to show
+        const mockTransactionTypes = [
+            "Trophy Mint", 
+            "Move Recorded", 
+            "Match Result", 
+            "Special Move", 
+            "Character Selection",
+            "Block Verification",
+            "Score Update"
+        ];
+        
+        // Generate a mock transaction every 8-15 seconds
+        const generateMockTransaction = () => {
+            // Generate mock transaction data
+            const hash = this.generateMockTransactionHash();
+            const actionType = mockTransactionTypes[Math.floor(Math.random() * mockTransactionTypes.length)];
+            
+            // Create mock transaction object
+            const mockTx = {
+                hash: hash,
+                actionType: actionType,
+                status: Math.random() > 0.8 ? 'pending' : 'confirmed',
+                timestamp: Date.now(),
+                mock: true
+            };
+            
+            // Log and emit the mock transaction event (for UI visibility only)
+            console.log('Generated visual mock transaction:', mockTx);
+            this.emitTransactionEvent(mockTx);
+            
+            // Schedule next mock transaction
+            const delay = 8000 + Math.random() * 7000; // 8-15 seconds
+            setTimeout(generateMockTransaction, delay);
+        };
+        
+        // Start generating mock transactions after a delay
+        setTimeout(generateMockTransaction, 5000);
     }
 }
 
