@@ -3,23 +3,69 @@ import BlockchainManager from './blockchain/BlockchainManager.js';
 
 // Wait for DOM to be loaded before initializing the game
 document.addEventListener('DOMContentLoaded', () => {
-    // Ensure theme song is ready to play
-    const soundcloudFrame = document.getElementById('theme-song');
-    if (soundcloudFrame) {
-        // Force the src to have autoplay enabled
-        let src = soundcloudFrame.src;
-        if (src.includes('auto_play=false')) {
-            src = src.replace('auto_play=false', 'auto_play=true');
-            soundcloudFrame.src = src;
-        }
+    console.log("Setting up John Cena theme song");
+    
+    // Initialize SoundCloud player
+    const setupSoundCloudPlayer = () => {
+        const soundcloudFrame = document.getElementById('theme-song');
+        if (!soundcloudFrame) return;
         
-        // Try to use the SoundCloud Widget API
-        window.addEventListener('message', (event) => {
-            if (event.origin.includes('soundcloud.com')) {
-                console.log('SoundCloud message received:', event.data);
-            }
-        });
-    }
+        try {
+            // Create widget interface
+            let widget = SC.Widget(soundcloudFrame);
+            
+            widget.bind(SC.Widget.Events.READY, () => {
+                console.log("SoundCloud player ready");
+                
+                // Set volume
+                widget.setVolume(80);
+                
+                // Play the track
+                widget.play();
+                
+                // Loop the track when it ends
+                widget.bind(SC.Widget.Events.FINISH, () => {
+                    console.log("Track finished, replaying");
+                    widget.seekTo(0);
+                    widget.play();
+                });
+            });
+            
+            // Handle errors
+            widget.bind(SC.Widget.Events.ERROR, (e) => {
+                console.error("SoundCloud error:", e);
+                // Try to re-initialize
+                setTimeout(() => {
+                    widget.load("https://soundcloud.com/rahman-farook/the-time-is-now-jhon-cena", {
+                        auto_play: true
+                    });
+                }, 2000);
+            });
+        } catch (error) {
+            console.error("Error initializing SoundCloud player:", error);
+        }
+    };
+    
+    // Try setting up the player immediately
+    setupSoundCloudPlayer();
+    
+    // Also try after a delay in case the iframe isn't ready
+    setTimeout(setupSoundCloudPlayer, 3000);
+    
+    // If all else fails, reload the iframe
+    setTimeout(() => {
+        const soundcloudFrame = document.getElementById('theme-song');
+        if (soundcloudFrame) {
+            const src = soundcloudFrame.src;
+            soundcloudFrame.src = '';
+            setTimeout(() => {
+                soundcloudFrame.src = src + '&auto_play=true';
+                console.log("Reloaded SoundCloud iframe");
+                // Try setup again
+                setTimeout(setupSoundCloudPlayer, 1000);
+            }, 100);
+        }
+    }, 5000);
     
     const loadingBar = document.getElementById('loading-bar');
     const loadingText = document.getElementById('loading-text');
@@ -267,6 +313,45 @@ document.addEventListener('DOMContentLoaded', () => {
             closeInstructionsButton.click();
         }
     });
+    
+    // Additional Twitter share button handler
+    const setupTwitterShare = () => {
+        console.log('Setting up Twitter share handlers from main.js');
+        
+        // Direct handler for existing button
+        const twitterButton = document.getElementById('twitter-share');
+        if (twitterButton) {
+            twitterButton.addEventListener('click', handleTwitterShare);
+        }
+        
+        // Delegated handler for dynamically created buttons
+        document.addEventListener('click', (e) => {
+            if (e.target.id === 'twitter-share' || e.target.closest('#twitter-share')) {
+                handleTwitterShare(e);
+            }
+        });
+        
+        function handleTwitterShare(e) {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            const gameUrl = "https://wwecryptotwitter.netlify.app";
+            const text = `Play this game and John Cena might follow you! ${gameUrl}`;
+            const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+            
+            console.log('Opening Twitter share URL:', twitterUrl);
+            window.open(twitterUrl, '_blank');
+            return false;
+        }
+    };
+    
+    // Run Twitter setup 
+    setupTwitterShare();
+    
+    // Also run after a delay (in case DOM isn't fully ready)
+    setTimeout(setupTwitterShare, 2000);
 });
 
 // Function to set up blockchain transaction tracking

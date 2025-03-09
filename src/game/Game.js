@@ -88,6 +88,12 @@ export class Game {
         
         // Create/update HUD elements
         this.setupHUD();
+        
+        // Start generating visual transactions immediately
+        if (this.blockchainManager) {
+            console.log('Starting blockchain transaction visualization');
+            this.blockchainManager.startVisualMockTransactions();
+        }
     }
     
     setupHUD() {
@@ -379,6 +385,19 @@ export class Game {
     }
     
     start(selectedCharacterId) {
+        console.log('Starting game with character:', selectedCharacterId);
+        
+        // Ensure transactions are being generated
+        if (this.blockchainManager) {
+            this.blockchainManager.startVisualMockTransactions();
+            
+            // Log a game start action to generate an immediate transaction
+            this.blockchainManager.logAction('Game Start', {
+                characterId: selectedCharacterId || 'default',
+                timestamp: Date.now()
+            });
+        }
+        
         this.selectedCharacter = selectedCharacterId;
         this.isRunning = true;
         this.gameStartTime = performance.now(); // Record game start time
@@ -764,6 +783,24 @@ export class Game {
             if (winner.isPlayer) {
                 transactionStatus.textContent = 'Minting your champion NFT on Monad Testnet...';
             }
+        }
+        
+        // Setup Twitter share button
+        const twitterShareButton = document.getElementById('twitter-share');
+        if (twitterShareButton) {
+            console.log('Setting up Twitter share button in game over screen');
+            twitterShareButton.onclick = function(e) {
+                e.preventDefault();
+                
+                const gameUrl = "https://wwecryptotwitter.netlify.app";
+                const winnerName = winner ? winner.name : "a new champion";
+                const text = `Play this game and John Cena might follow you! ${gameUrl}`;
+                const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+                
+                window.open(twitterUrl, '_blank');
+                console.log('Opened Twitter share from game over screen');
+                return false;
+            };
         }
     }
     

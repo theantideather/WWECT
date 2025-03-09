@@ -1,179 +1,200 @@
-import { Game } from './game/Game.js';
+import Game from './game/Game.js';
 import BlockchainManager from './blockchain/BlockchainManager.js';
 import './styles/main.css';
 
 // Initialize and start the game when the page is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    // Create the game instance
-    const game = new Game({
-        containerId: 'game-container',
-        debug: false
-    });
+    console.log("DOM loaded, initializing blockchain manager");
     
-    // Start the game
-    game.start();
+    // Initialize blockchain manager
+    const blockchainManager = new BlockchainManager();
     
-    // Get the transaction indicator or create one if it doesn't exist
-    let transactionIndicator = document.getElementById('transaction-indicator');
-    if (!transactionIndicator) {
-        // Create transaction indicator
-        transactionIndicator = document.createElement('div');
-        transactionIndicator.id = 'transaction-indicator';
-        
-        // Get contract address from environment
-        const contractAddress = process.env.CONTRACT_ADDRESS || "0x2D8C8ccE5f3E693102dF1121d86228844155db8F";
-        const shortAddress = contractAddress ? 
-            `${contractAddress.substring(0, 6)}...${contractAddress.substring(contractAddress.length - 6)}` : 
-            "Not set";
-        
-        transactionIndicator.innerHTML = `
-            <div id="transaction-count">MONAD Transactions: 0</div>
-            <div>Contract: <span id="contract-address">${shortAddress}</span></div>
-            <div id="connection-status">Connecting to blockchain...</div>
-            <div id="transaction-list"></div>
-        `;
-        
-        document.body.appendChild(transactionIndicator);
+    // Make sure the transaction indicator is visible
+    const transactionIndicator = document.getElementById('transaction-indicator');
+    if (transactionIndicator) {
+        transactionIndicator.style.display = 'block';
+        transactionIndicator.style.visibility = 'visible';
+        transactionIndicator.style.opacity = '1';
+        transactionIndicator.style.zIndex = '10000';
     }
     
-    // Ensure the transaction indicator is visible
-    transactionIndicator.style.display = 'block';
-    transactionIndicator.style.zIndex = '10000';
+    // Initialize transaction count and list
+    let transactionCount = 0;
+    const transactionCountElement = document.getElementById('transaction-count');
+    const transactionList = document.getElementById('transaction-list');
+    const contractAddressElement = document.getElementById('contract-address');
+    const connectionStatus = document.getElementById('connection-status');
     
-    console.log('Transaction indicator initialized:', transactionIndicator);
-    
-    // Initialize transaction count
-    let txCount = 0;
-    const contractAddress = document.getElementById('contract-address');
-    if (contractAddress) {
-        const address = process.env.CONTRACT_ADDRESS || "0x2D8C8ccE5f3E693102dF1121d86228844155db8F";
-        const shortAddress = address ? 
-            `${address.substring(0, 6)}...${address.substring(address.length - 6)}` : 
-            "Not set";
-        contractAddress.innerHTML = `<a href="https://explorer.testnet.monad.xyz/address/${address}" target="_blank">${shortAddress}</a>`;
-    }
-    
-    // Function to generate random transaction hash
+    // Generate a random transaction hash for visual purposes
     const generateRandomHash = () => {
-        const characters = '0123456789abcdef';
+        const chars = '0123456789abcdef';
         let hash = '0x';
-        for (let i = 0; i < 64; i++) {
-            hash += characters.charAt(Math.floor(Math.random() * characters.length));
+        for (let i = 0; i < 40; i++) {
+            hash += chars[Math.floor(Math.random() * chars.length)];
         }
         return hash;
     };
     
-    // Types of mock transactions to show
-    const mockTransactionTypes = [
-        "Trophy Mint", 
-        "Move Recorded", 
-        "Match Result", 
-        "Special Move", 
-        "Character Selection",
-        "Block Verification",
-        "Score Update"
-    ];
-    
-    // Function to add a mock transaction
-    const addMockTransaction = () => {
-        const hash = generateRandomHash();
-        const actionType = mockTransactionTypes[Math.floor(Math.random() * mockTransactionTypes.length)];
-        const mockTx = {
-            hash: hash,
-            actionType: actionType,
-            status: Math.random() > 0.8 ? 'pending' : 'confirmed',
-            timestamp: Date.now(),
-            mock: true
-        };
-        
-        // Add to transaction list using the same handler as real transactions
-        game.blockchainManager.emitTransactionEvent(mockTx);
-        
-        // Schedule next mock transaction
-        const delay = 5000 + Math.random() * 15000; // Random delay between 5-20 seconds
-        setTimeout(addMockTransaction, delay);
-    };
-    
-    // Start adding mock transactions after a delay
-    setTimeout(addMockTransaction, 10000);
-    
-    // Update connection status
-    const updateConnectionStatus = () => {
-        const status = document.getElementById('connection-status');
-        const manager = game.blockchainManager;
-        
-        if (manager.mockMode) {
-            status.textContent = 'Running in Mock Mode';
-            status.style.color = '#f39c12';
-        } else if (manager.connected) {
-            status.textContent = `Connected to ${manager.network}`;
-            status.style.color = '#2ecc71';
-        } else {
-            status.textContent = 'Disconnected';
-            status.style.color = '#e74c3c';
-        }
-        
-        console.log('Blockchain connection status:', status.textContent);
-    };
-    
-    // Check connection status after a short delay
-    setTimeout(updateConnectionStatus, 2000);
-    
-    // Subscribe to transaction events directly
-    game.blockchainManager.onTransaction((transaction) => {
-        console.log('Transaction event received:', transaction);
-        
+    // Update transaction UI when a new transaction occurs
+    const updateTransactionUI = (transaction) => {
         // Update transaction count
-        txCount++;
-        const txCountElement = document.getElementById('transaction-count');
-        if (txCountElement) {
-            txCountElement.textContent = `MONAD Transactions: ${txCount}`;
+        transactionCount++;
+        if (transactionCountElement) {
+            transactionCountElement.textContent = `MONAD Transactions: ${transactionCount}`;
         }
         
-        // Update transaction list
-        const txList = document.getElementById('transaction-list');
-        if (txList) {
-            const monadLink = transaction.hash && !transaction.mock ? 
-                `<a href="https://explorer.testnet.monad.xyz/tx/${transaction.hash}" target="_blank">View on Monad Explorer</a>` : 
-                '';
+        // Add transaction to list
+        if (transactionList) {
+            // Create transaction item element
+            const item = document.createElement('div');
+            item.className = 'transaction-item';
             
-            const statusColor = transaction.status === 'confirmed' ? '#2ecc71' : 
-                                transaction.status === 'pending' ? '#f39c12' : '#e74c3c';
+            // Create transaction hash with link to Monad explorer
+            const hashElement = document.createElement('div');
+            hashElement.className = 'tx-hash';
+            const hashLink = document.createElement('a');
+            hashLink.href = `https://explorer.monad.xyz/tx/${transaction.hash}`;
+            hashLink.target = '_blank';
+            hashLink.textContent = `${transaction.hash.substring(0, 6)}...${transaction.hash.substring(transaction.hash.length - 4)}`;
+            hashElement.appendChild(hashLink);
             
-            const statusText = transaction.status === 'confirmed' ? 'Confirmed' : 
-                              transaction.status === 'pending' ? 'Pending' : 'Failed';
+            // Create transaction type element
+            const typeElement = document.createElement('div');
+            typeElement.className = 'tx-type';
+            typeElement.textContent = transaction.actionType || 'Transaction';
             
-            const newTx = document.createElement('div');
-            newTx.className = 'transaction-item';
-            newTx.innerHTML = `
-                <div class="tx-type">${transaction.actionType}</div>
-                <div class="tx-status" style="color: ${statusColor}">${statusText}</div>
-                <div class="tx-time">${new Date(transaction.timestamp).toLocaleTimeString()}</div>
-                <div class="tx-hash">${monadLink}</div>
-            `;
+            // Create transaction status element
+            const statusElement = document.createElement('div');
+            statusElement.className = `tx-status ${transaction.status}`;
+            statusElement.textContent = transaction.status === 'confirmed' ? '✓' : (transaction.status === 'pending' ? '⏳' : '⚠️');
             
-            // Insert at the top
-            if (txList.firstChild) {
-                txList.insertBefore(newTx, txList.firstChild);
-            } else {
-                txList.appendChild(newTx);
+            // Add elements to item
+            item.appendChild(hashElement);
+            item.appendChild(typeElement);
+            item.appendChild(statusElement);
+            
+            // Add item to list
+            transactionList.prepend(item);
+            
+            // Limit to 10 items
+            while (transactionList.children.length > 10) {
+                transactionList.removeChild(transactionList.lastChild);
             }
+        }
+    };
+    
+    // Force a few transactions to appear right away
+    const addMockTransaction = () => {
+        const transaction = {
+            hash: generateRandomHash(),
+            actionType: ['Character Selection', 'Game Start', 'Move Recorded'][Math.floor(Math.random() * 3)],
+            status: Math.random() > 0.2 ? 'confirmed' : 'pending',
+            timestamp: Date.now(),
+        };
+        updateTransactionUI(transaction);
+    };
+    
+    // Add a few initial transactions
+    for (let i = 0; i < 3; i++) {
+        setTimeout(() => {
+            addMockTransaction();
+        }, i * 1000);
+    }
+    
+    // Initialize blockchain and connect
+    blockchainManager.initialize().then(() => {
+        console.log('Blockchain manager initialized');
+        
+        // Update contract address in UI
+        if (contractAddressElement && blockchainManager.contractAddress) {
+            const shortAddress = `${blockchainManager.contractAddress.substring(0, 6)}...${blockchainManager.contractAddress.substring(blockchainManager.contractAddress.length - 4)}`;
+            contractAddressElement.textContent = shortAddress;
             
-            // Limit list to 10 items
-            while (txList.children.length > 10) {
-                txList.removeChild(txList.lastChild);
+            // Add click event to copy address
+            contractAddressElement.style.cursor = 'pointer';
+            contractAddressElement.title = 'Click to copy contract address';
+            contractAddressElement.addEventListener('click', () => {
+                navigator.clipboard.writeText(blockchainManager.contractAddress);
+                alert('Contract address copied to clipboard!');
+            });
+        }
+        
+        // Update connection status
+        const updateConnectionStatus = () => {
+            if (connectionStatus) {
+                connectionStatus.textContent = 'Connected to MONAD Testnet';
+                connectionStatus.style.color = '#4CAF50';
             }
+        };
+        updateConnectionStatus();
+        
+        // Subscribe to blockchain events
+        blockchainManager.onTransaction((transaction) => {
+            console.log('Transaction received:', transaction);
+            updateTransactionUI(transaction);
+        });
+        
+        // Start game after blockchain is initialized
+        const game = new Game(blockchainManager);
+        game.initialize();
+    }).catch(error => {
+        console.error('Error initializing blockchain:', error);
+        if (connectionStatus) {
+            connectionStatus.textContent = 'Failed to connect to blockchain';
+            connectionStatus.style.color = '#f44336';
         }
     });
     
-    // Setup Twitter share button
-    document.addEventListener('click', (e) => {
-        if (e.target.id === 'twitter-share' || e.target.closest('#twitter-share')) {
-            const winnerName = document.querySelector('#winner-display h3')?.textContent || 'a fighter';
+    // Setup Twitter share button with direct event listeners
+    const twitterShareButton = document.getElementById('twitter-share');
+    if (twitterShareButton) {
+        console.log('Found Twitter share button, attaching event listener');
+        twitterShareButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Twitter share button clicked directly');
+            
+            // Create the share URL
             const gameUrl = "https://wwecryptotwitter.netlify.app";
-            const text = `Play this game so that John Cena follows you! ${gameUrl} - I just played Crypto Twitter Champion and ${winnerName} was crowned champion! #WWECrypto #BlockchainGaming`;
+            const text = `Play this game and John Cena might follow you! ${gameUrl}`;
             const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
-            window.open(twitterUrl, '_blank');
-        }
-    });
+            
+            // Open Twitter intent in a popup window
+            const width = 575, height = 400;
+            const left = (window.innerWidth - width) / 2;
+            const top = (window.innerHeight - height) / 2;
+            const opts = `status=1,width=${width},height=${height},top=${top},left=${left}`;
+            
+            window.open(twitterUrl, 'twitter', opts);
+            console.log('Opened Twitter share window');
+            
+            return false;
+        });
+    } else {
+        // Fallback for when the button might be added later (e.g., after game over)
+        document.addEventListener('click', function(e) {
+            const target = e.target.closest('#twitter-share');
+            if (target) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Twitter share button clicked via delegation');
+                
+                // Create the share URL
+                const gameUrl = "https://wwecryptotwitter.netlify.app";
+                const text = `Play this game and John Cena might follow you! ${gameUrl}`;
+                const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+                
+                // Open Twitter intent in a popup window
+                const width = 575, height = 400;
+                const left = (window.innerWidth - width) / 2;
+                const top = (window.innerHeight - height) / 2;
+                const opts = `status=1,width=${width},height=${height},top=${top},left=${left}`;
+                
+                window.open(twitterUrl, 'twitter', opts);
+                console.log('Opened Twitter share window');
+                
+                return false;
+            }
+        });
+    }
 }); 

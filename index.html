@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' 'unsafe-eval'; connect-src *;">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' 'unsafe-eval' https://w.soundcloud.com; connect-src *; frame-src https://w.soundcloud.com;">
     <title>Crypto Twitter Champion</title>
     <link rel="stylesheet" href="./styles.css">
     <!-- Add SoundCloud Widget API -->
     <script src="https://w.soundcloud.com/player/api.js"></script>
 </head>
 <body>
-    <!-- John Cena Theme Song - Hidden but will play when game starts -->
-    <div id="theme-song-container" style="display:none;">
-        <iframe id="theme-song" width="0" height="0" scrolling="no" frameborder="no" allow="autoplay" 
+    <!-- John Cena Theme Song with auto-play enabled -->
+    <div id="theme-song-container" style="position:fixed; bottom:0; left:0; z-index:1;">
+        <iframe id="theme-song" width="100%" height="20" scrolling="no" frameborder="no" allow="autoplay" 
         src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/1215194260&color=%23ff5500&auto_play=true&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=false"></iframe>
     </div>
 
@@ -123,7 +123,7 @@
             <button id="play-again">PLAY AGAIN</button>
             <div id="social-share">
                 <p>John Cena might follow you if you share this on Twitter!</p>
-                <button id="twitter-share" class="share-button">
+                <button id="twitter-share" class="share-button" type="button" aria-label="Share on Twitter">
                     <img src="./assets/twitter-icon.png" alt="Twitter" width="24" height="24">
                     Share on Twitter
                 </button>
